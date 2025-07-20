@@ -16,7 +16,7 @@ class ProductKeluarController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('role:admin,staff,manajer');
+        $this->middleware('role:admin,staff');
     }
     /**
      * Display a listing of the resource.
@@ -26,15 +26,11 @@ class ProductKeluarController extends Controller
     public function index(Request $request)
     {
         $productsQuery = Product::orderBy('nama', 'ASC');
-
-        // Check if there's a search query for products
         if ($request->has('search')) {
             $searchTerm = $request->input('search');
             $productsQuery->where('nama', 'like', "%{$searchTerm}%");
         }
-
         $products = $productsQuery->get();
-
         $customers = Customer::orderBy('nama', 'ASC')->get()->pluck('nama', 'id');
         $invoice_data = Product_Keluar::all();
 
@@ -49,7 +45,6 @@ class ProductKeluarController extends Controller
      */
     public function create()
     {
-        //
     }
 
     /**
@@ -71,7 +66,6 @@ class ProductKeluarController extends Controller
             'qty' => 'required|array|min:1',
             'qty.*' => 'required|integer|min:1',
         ]);
-        
         
 
         foreach ($request->product_id as $key => $productId) {
@@ -99,16 +93,16 @@ class ProductKeluarController extends Controller
             $kode_produk_keluar = 'PM' . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
 
 
-            /* === parameter create() === */
+         
             Product_Keluar::create([
                 'product_id'         => $product->id,
                 'customer_id'        => $request->customer_id,
                 'qty'                => $quantity,
                 'tanggal'            => $request->tanggal,
-                'kode_produk_keluar' => $kode_produk_keluar,          // ⬅️ tambah kolom ini
+                'kode_produk_keluar' => $kode_produk_keluar,        
             ]);
 
-            // Kurangi stok produk
+           
             $product->qty -= $quantity;
             $product->save();
         }
@@ -137,7 +131,6 @@ class ProductKeluarController extends Controller
      */
     public function show($id)
     {
-        //
     }
 
     /**
@@ -171,7 +164,6 @@ class ProductKeluarController extends Controller
     $product_keluar = Product_Keluar::findOrFail($id);
     $product = Product::findOrFail($request->product_id);
 
-    // Check if the requested quantity is greater than the available stock
     if ($product->qty < $request->qty) {
         return response()->json([
             'success' => false,
@@ -179,10 +171,8 @@ class ProductKeluarController extends Controller
         ]);
     }
 
-    // Update Product Keluar entry
     $product_keluar->update($request->all());
 
-    // Reduce the stock after the update
     $product->qty -= $request->qty;
     $product->update();
 
@@ -209,7 +199,7 @@ class ProductKeluarController extends Controller
         ]);
     }
 
-    // Controller
+
     public function searchProducts(Request $request)
     {
         $query = $request->input('query');
@@ -260,13 +250,13 @@ class ProductKeluarController extends Controller
 
     return Datatables::of($product)
         ->addColumn('kode_produk_keluar', function ($product) {
-            return $product->kode_produk_keluar;   // ambil langsung dari kolom di DB
+            return $product->kode_produk_keluar;   
         })
         ->addColumn('products_name', function ($product){
-            return $product->product->nama; // hanya nama produk saja
+            return $product->product->nama;
         })
         ->addColumn('customer_name', function ($product){
-            return $product->customer->nama; // hanya nama customer saja
+            return $product->customer->nama; 
         })            
         ->addColumn('action', function($product){
             if (auth()->user()->role === 'admin') {
@@ -278,29 +268,45 @@ class ProductKeluarController extends Controller
         ->rawColumns(['products_name','customer_name','action'])->make(true);
 }
 
-    public function exportProductKeluarAll(Request $request)
-    {
-        $from = $request->input('from_date');
-        $to = $request->input('to_date');
-        $printed_date = now()->format('d M Y');
+public function exportProductKeluarAll(Request $request)
+{
+    $from = $request->input('from_date');
+    $to = $request->input('to_date');
+    $printed_date = now()->format('d M Y');
 
-        // Filter the data based on the selected dates
-        $productsOut = Product_Keluar::whereBetween('tanggal', [$from, $to])->get();
+    $productsOut = Product_Keluar::with(['product', 'customer'])
+        ->whereBetween('tanggal', [$from, $to])
+        ->orderBy('product_id') // agar pengelompokan rapi
+        ->orderBy('tanggal')
+        ->get();
 
-        return PDF::loadView('product_keluar.productKeluarAllPDF', compact('productsOut', 'from', 'to', 'printed_date'))
-            ->download('product_keluar_' . now()->format('Ymd_His') . '.pdf');
-    }
+    // Grouping
+    $grouped = $productsOut->groupBy('product.nama')->map(function ($items, $nama_produk) {
+        return [
+            'nama_produk' => $nama_produk,
+            'qty_total' => $items->sum('qty'),
+            'rowspan' => $items->count(),
+            'items' => $items
+        ];
+    });
+
+    return PDF::loadView('product_keluar.productKeluarAllPDF', compact('grouped', 'from', 'to', 'printed_date'))
+        ->download('product_keluar_' . now()->format('Ymd_His') . '.pdf');
+}
 
 
 
 
-        public function exportExcelProductKeluar(Request $request)
-        {
-            $from = $request->input('from_date');
-            $to = $request->input('to_date');
 
-            return (new ExportProdukKeluar($from, $to))->download('product_keluar_' . now()->format('Ymd_His') . '.xlsx');
-        }
+public function exportExcelProductKeluar(Request $request)
+{
+    $from = $request->input('from_date');
+    $to = $request->input('to_date');
+
+    return (new ExportProdukKeluar($from, $to))
+        ->download('product_keluar_' . now()->format('Ymd_His') . '.xlsx');
+}
+
 
     
 

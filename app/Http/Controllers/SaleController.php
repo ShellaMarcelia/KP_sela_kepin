@@ -36,7 +36,6 @@ class SaleController extends Controller
      */
     public function create()
     {
-        //
     }
 
     /**
@@ -71,7 +70,6 @@ class SaleController extends Controller
      */
     public function show($id)
     {
-        //
     }
 
     /**
@@ -143,15 +141,13 @@ class SaleController extends Controller
 
     public function ImportExcel(Request $request)
     {
-        //Validasi
         $this->validate($request, [
             'file' => 'required|mimes:xls,xlsx'
         ]);
 
         if ($request->hasFile('file')) {
-            //UPLOAD FILE
-            $file = $request->file('file'); //GET FILE
-            Excel::import(new SalesImport, $file); //IMPORT FILE
+            $file = $request->file('file'); 
+            Excel::import(new SalesImport, $file); 
             return redirect()->back()->with(['success' => 'Upload file data sales !']);
         }
 

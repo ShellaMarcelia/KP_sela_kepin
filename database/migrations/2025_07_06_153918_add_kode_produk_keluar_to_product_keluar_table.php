@@ -11,7 +11,6 @@ class AddKodeProdukKeluarToProductKeluarTable extends Migration
      *
      * @return void
      */
-    // database/migrations/…_add_kode_produk_keluar_to_product_keluar_table.php
 public function up()
 {
     Schema::table('product_keluar', function (Blueprint $table) {

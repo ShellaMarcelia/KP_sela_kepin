@@ -18,10 +18,10 @@
             <h3 class="box-title">Data Produk Masuk</h3>
         </div>
         <div class="box-header">
-        @role('admin')
+        @role('admin','staff')
             <a onclick="addForm()" class="btn btn-primary">Tambah Produk Masuk</a>
             @endrole
-            @role('admin','manajer')
+            @role('admin')
             <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#modal-export">
                 Export
             </button>

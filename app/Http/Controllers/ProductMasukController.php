@@ -16,7 +16,7 @@ class ProductMasukController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('role:admin,staff,manajer');
+        $this->middleware('role:admin,staff');
     }
     /**
      * Display a listing of the resource.
@@ -47,7 +47,6 @@ class ProductMasukController extends Controller
      */
     public function create()
     {
-        //
     }
 
     /**
@@ -58,23 +57,19 @@ class ProductMasukController extends Controller
      */
     public function store(Request $request)
     {
-        
-        // Validate the input arrays
         $this->validate($request, [
             'supplier_id'    => 'required|exists:suppliers,id',
             'tanggal'        => 'required|date',
-            'product_id'     => 'required|array|min:1', // Array for product IDs
+            'product_id'     => 'required|array|min:1', 
             'product_id.*' => 'required|exists:products,id',
             'qty' => 'required|array|min:1',
             'qty.*' => 'required|integer|min:1',
         ]);
 
-        // Loop through the products and quantities arrays
         foreach ($request->product_id as $key => $productId) {
             $product = Product::findOrFail($productId);
             $quantity = (int) $request->qty[$key];
 
-            /// Ambil kode terakhir
             $last = Product_Masuk::orderBy('kode_produk_masuk', 'desc')->first();
 
             if ($last && preg_match('/PM(\d{4})/', $last->kode_produk_masuk, $match)) {
@@ -86,8 +81,6 @@ class ProductMasukController extends Controller
             $newNumber = $lastNumber + 1;
             $kode_produk_masuk = 'PM' . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
 
-
-            // Create the Product Masuk entry
             Product_Masuk::create([
                 'product_id'  => $product->id,
                 'supplier_id' => $request->supplier_id,
@@ -96,7 +89,6 @@ class ProductMasukController extends Controller
                 'kode_produk_masuk'   => $kode_produk_masuk,
             ]);
 
-            // Increase the stock after receiving products (Product Masuk = stock increases)
             $product->qty += $quantity;
             $product->save();
         }
@@ -116,7 +108,6 @@ class ProductMasukController extends Controller
      */
     public function show($id)
     {
-        //
     }
 
     /**
@@ -145,9 +136,6 @@ class ProductMasukController extends Controller
 
         $product_masuk = Product_Masuk::findOrFail($id);
         $product = Product::findOrFail($request->product_id);
-
-        // Check if the requested quantity is greater than the available stock
-        
     }
 
     /**
@@ -158,18 +146,10 @@ class ProductMasukController extends Controller
      */
     public function destroy($id)
     {
-        // Find the Product_Masuk entry to be deleted
         $productMasuk = Product_Masuk::findOrFail($id);
-        
-        // Find the associated product
         $product = Product::findOrFail($productMasuk->product_id);
-        
-        // Decrease the product quantity by the quantity of the deleted entry
-        // (because we're removing a "product masuk" record, stock should decrease)
         $product->qty -= $productMasuk->qty;
         $product->save();
-        
-        // Now delete the Product_Masuk entry
         $productMasuk->delete();
 
         return response()->json([
@@ -180,12 +160,9 @@ class ProductMasukController extends Controller
     public function searchProducts(Request $request)
     {
         $query = $request->input('query');
-
-        // Ambil produk yang sesuai dengan query dan batasi hasil menjadi 5
         $products = Product::where('nama', 'like', "%{$query}%")
                             ->orderBy('nama', 'asc')
-                            ->get(['id', 'nama']); // Mengambil hanya id dan nama produk
-        
+                            ->get(['id', 'nama']); 
         return response()->json(['products' => $products]);
     }
 
@@ -194,11 +171,9 @@ class ProductMasukController extends Controller
     public function searchSuppliers(Request $request)
     {
         $query = $request->input('query');
-
-        // Ambil supplier yang sesuai dengan query dan batasi hasil menjadi 5
         $suppliers = Supplier::where('nama', 'like', "%{$query}%")
                             ->orderBy('nama', 'asc')
-                            ->get(['id', 'nama']); // Mengambil hanya id dan nama supplier
+                            ->get(['id', 'nama']); 
         
         return response()->json(['suppliers' => $suppliers]);
     }
@@ -232,20 +207,59 @@ class ProductMasukController extends Controller
 
     }
 
+        // public function exportProductMasukAll(Request $request)
+        // {
+        //     $from = $request->input('from_date');
+        //     $to = $request->input('to_date');
+        //     $printed_date = now()->format('d M Y');
+        //     $product_masuk = Product_Masuk::whereBetween('tanggal', [$from, $to])->get();
+    
+        //     return PDF::loadView('product_masuk.productMasukAllPDF', compact('product_masuk', 'from', 'to', 'printed_date'))
+        //         ->download('product_masuk_' . now()->format('Ymd_His') . '.pdf');
+        // }
+        
         public function exportProductMasukAll(Request $request)
-        {
-            $from = $request->input('from_date');
-            $to = $request->input('to_date');
-            $printed_date = now()->format('d M Y');
-    
-            // Filter the data based on the selected dates
-            $product_masuk = Product_Masuk::whereBetween('tanggal', [$from, $to])->get();
-    
-            return PDF::loadView('product_masuk.productMasukAllPDF', compact('product_masuk', 'from', 'to', 'printed_date'))
-                ->download('product_masuk_' . now()->format('Ymd_His') . '.pdf');
+{
+    $from = $request->input('from_date');
+    $to = $request->input('to_date');
+    $printed_date = now()->format('d M Y');
+
+    $grouped = Product_Masuk::with(['product', 'supplier'])
+        ->whereBetween('tanggal', [$from, $to])
+        ->get()
+        ->groupBy('product_id');
+
+    $data = [];
+
+    foreach ($grouped as $productId => $items) {
+        $qty_total = $items->sum('qty');
+        $rows = [];
+
+        foreach ($items as $item) {
+            $rows[] = [
+                'qty' => $item->qty,
+                'tanggal' => $item->tanggal,
+                'supplier' => $item->supplier->nama,
+            ];
         }
-        
-        
+
+        $data[] = [
+            'nama_produk' => $items->first()->product->nama,
+            'qty_total' => $qty_total,
+            'items' => $rows,
+            'rowspan' => count($rows)
+        ];
+    }
+
+    return PDF::loadView('product_masuk.productMasukAllPDF', [
+        'data' => $data,
+        'from' => $from,
+        'to' => $to,
+        'printed_date' => $printed_date
+    ])->download('product_masuk_' . now()->format('Ymd_His') . '.pdf');
+}
+
+
 
         public function exportExcel(Request $request)
         {

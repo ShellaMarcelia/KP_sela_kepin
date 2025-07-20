@@ -14,7 +14,7 @@ class AddKodeCustomerToCustomersTable extends Migration
     public function up()
     {
         Schema::table('customers', function (Blueprint $table) {
-            $table->string('kode_customer')->unique()->nullable();  // Add 'nullable' or 'unique' based on your use case
+            $table->string('kode_customer')->unique()->nullable();  
         });
     }
 

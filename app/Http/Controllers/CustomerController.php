@@ -15,7 +15,7 @@ class CustomerController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('role:admin,staff,manajer');
+        $this->middleware('role:admin,staff');
     }
     /**
      * Display a listing of the resource.
@@ -35,7 +35,6 @@ class CustomerController extends Controller
      */
     public function create()
     {
-        //
     }
 
     /**
@@ -58,20 +57,17 @@ class CustomerController extends Controller
         if ($lastCustomer && preg_match('/C(\d{4})/', $lastCustomer->kode_customer, $matches)) {
             $lastNumber = (int) $matches[1];
         } else {
-            $lastNumber = 0; // Jika tidak ada data, mulai dari 0
+            $lastNumber = 0; 
         }
-    
-        // Buat kode baru
         $newNumber = $lastNumber + 1;
-        $kode_customer = 'C' . str_pad($newNumber, 4, '0', STR_PAD_LEFT); // Misal: C0001
+        $kode_customer = 'C' . str_pad($newNumber, 4, '0', STR_PAD_LEFT); 
     
-        //  Store the new customer
         Customer::create([
             'nama' => $request->nama,
             'alamat' => $request->alamat,
             'email' => $request->email,
             'telepon' => $request->telepon,
-            'kode_customer' => $kode_customer,  // Store the generated or passed customer code
+            'kode_customer' => $kode_customer,  
         ]);
     
         return response()->json([
@@ -90,7 +86,6 @@ class CustomerController extends Controller
      */
     public function show($id)
     {
-        //
     }
 
     /**
@@ -116,7 +111,7 @@ class CustomerController extends Controller
         $this->validate($request, [
             'nama'      => 'required|string|min:2',
             'alamat'    => 'required|string|min:2',
-            'email'     => 'required|string|email|max:255|unique:customers,email,' . $id,  // Correct the validation rule
+            'email'     => 'required|string|email|max:255|unique:customers,email,' . $id,  
             'telepon'   => 'required|string|min:10|max:13',
         ]);
 
@@ -152,14 +147,14 @@ class CustomerController extends Controller
 
     $customers = Customer::where('nama', 'like', '%' . $query . '%')
         ->orWhere('kode_customer', 'like', '%' . $query . '%')
-        ->get(['id', 'nama', 'kode_customer']); // hanya ambil kolom yang dibutuhkan
+        ->get(['id', 'nama', 'kode_customer']); 
 
     return response()->json(['customers' => $customers]);
 }
 
     public function apiCustomers(Request $request)
     {
-        $customer = Customer::query(); // INI WAJIB PAKAI query(), bukan all()
+        $customer = Customer::query();
 
         return Datatables::of($customer)
             ->addColumn('action', function($customer){
@@ -171,7 +166,7 @@ class CustomerController extends Controller
                 return '';
             })
             ->rawColumns(['action'])
-            ->make(true); // generate sesuai struktur yg diharapkan DataTables
+            ->make(true); 
     }
 
 

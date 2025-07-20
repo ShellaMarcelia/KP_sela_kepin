@@ -78,28 +78,38 @@
         <strong>Tanggal Cetak:</strong> {{ $printed_date ?? now()->format('d M Y') }}
     </div>
 
-    <table id="product-keluar" width="100%">
-        <thead>
-            <tr>
-                <td>Kode Produk Keluar</td>
-                <td>Nama Produk</td>
-                <td>Nama Pelanggan</td>
-                <td>QTY</td>
-                <td>Tanggal Pembelian</td>
-            </tr>
-        </thead>
-        @foreach($productsOut as $pk)
-            <tbody>
-            <tr>
-                <td>{{ 'PK' . str_pad($pk->id, 4, '0', STR_PAD_LEFT) }}</td>
-                <td>{{ $pk->product->nama }}</td>
-                <td>{{ $pk->customer->nama }}</td>
-                <td>{{ $pk->qty }}</td>
-                <td>{{ $pk->tanggal }}</td>
-            </tr>
-            </tbody>
+    <table width="100%" border="1" cellspacing="0" cellpadding="4">
+    <thead>
+        <tr>
+            <th>Nama Produk</th>
+            <th>QTY</th>
+            <th>QTY Total</th>
+            <th>Nama Pelanggan</th>
+            <th>Tanggal Pembelian</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach($grouped as $group)
+            @foreach($group['items'] as $index => $pk)
+                <tr>
+                    @if($index === 0)
+                        <td rowspan="{{ $group['rowspan'] }}">{{ $group['nama_produk'] }}</td>
+                    @endif
+
+                    <td>{{ $pk->qty }}</td>
+
+                    @if($index === 0)
+                        <td rowspan="{{ $group['rowspan'] }}">{{ $group['qty_total'] }}</td>
+                    @endif
+
+                    <td>{{ $pk->customer->nama }}</td>
+                    <td>{{ $pk->tanggal }}</td>
+                </tr>
+            @endforeach
         @endforeach
-    </table>
+    </tbody>
+</table>
+
 
 
 </body>

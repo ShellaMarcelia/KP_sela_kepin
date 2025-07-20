@@ -2,9 +2,7 @@
 
 
 @section('top')
-    <!-- DataTables -->
     <link rel="stylesheet" href="{{ asset('assets/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css') }}">
-    {{--<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.css">--}}
     @include('sweet::alert')
 @endsection
 
@@ -16,18 +14,16 @@
         </div>
 
         <div class="box-header">
-        @role('admin')
+        @role('admin','staff')
             <a onclick="addForm()" class="btn btn-primary" >Tambah Pelanggan</a>
             @endrole
-            @role('admin','manajer')
+            @role('admin')
             <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#modal-export">
                 Export
             </button>
             @endrole
         </div>
 
-
-        <!-- /.box-header -->
         <div class="box-body">
             <table id="customer-table" class="table table-striped">
             <thead>
@@ -43,12 +39,12 @@
                 <tbody></tbody>
             </table>
         </div>
-        <!-- /.box-body -->
+
     </div>
 
 
     @include('customers.form')
-<!-- modal -->
+
 <div class="modal fade" id="modal-export" tabindex="-1" role="dialog" aria-labelledby="modalExportLabel">
   <div class="modal-dialog" role="document">
     <form action="" method="GET" target="_blank" id="form-export">
@@ -83,28 +79,10 @@
 
 @section('bot')
 
-    <!-- DataTables -->
     <script src=" {{ asset('assets/bower_components/datatables.net/js/jquery.dataTables.min.js') }} "></script>
     <script src="{{ asset('assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js') }} "></script>
 
-    {{-- Validator --}}
     <script src="{{ asset('assets/validator/validator.min.js') }}"></script>
-
-    {{--<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>--}}
-
-    {{--<script>--}}
-    {{--$(function () {--}}
-    {{--$('#items-table').DataTable()--}}
-    {{--$('#example2').DataTable({--}}
-    {{--'paging'      : true,--}}
-    {{--'lengthChange': false,--}}
-    {{--'searching'   : false,--}}
-    {{--'ordering'    : true,--}}
-    {{--'info'        : true,--}}
-    {{--'autoWidth'   : false--}}
-    {{--})--}}
-    {{--})--}}
-    {{--</script>--}}
 
     <script type="text/javascript">
         var table = $('#customer-table').DataTable({
@@ -200,8 +178,6 @@
                     $.ajax({
                         url : url,
                         type : "POST",
-                        //hanya untuk input data tanpa dokumen
-//                      data : $('#modal-form form').serialize(),
                         data: new FormData($("#modal-form form")[0]),
                         contentType: false,
                         processData: false,

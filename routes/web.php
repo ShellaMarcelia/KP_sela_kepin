@@ -54,14 +54,9 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('/exportProductsAll', 'ProductController@exportProductsAll')->name('exportPDF.productsAll');
 	Route::get('/exportProductsAllExcel', 'ProductController@exportExcel')->name('exportExcel.productsAll');
 
-	// Route::get('/exportProductKeluarAll', 'ProductKeluarController@exportProductKeluarAll')->name('exportPDF.productKeluarAll');
-	// Route::get('/exportProductKeluarAllExcel', 'ProductKeluarController@exportExcelProductKeluar')->name('exportExcel.productKeluarAll');
-
-Route::get('/exportProductKeluarAll',        'ProductKeluarController@exportProductKeluarAll')
-     ->name('exportPDF.productKeluarAll');
-
-Route::get('/exportProductKeluarAllExcel',   'ProductKeluarController@exportExcelProductKeluar')
-     ->name('exportExcel.productKeluarAll');
+	
+	Route::get('/exportProductKeluarAll',        'ProductKeluarController@exportProductKeluarAll')->name('exportPDF.productKeluarAll');
+	Route::get('/exportProductKeluarAllExcel',   'ProductKeluarController@exportExcelProductKeluar')->name('exportExcel.productKeluarAll');
 
 
 	Route::get('/exportProductMasukAll', 'ProductMasukController@exportProductMasukAll')->name('exportPDF.productMasukAll');

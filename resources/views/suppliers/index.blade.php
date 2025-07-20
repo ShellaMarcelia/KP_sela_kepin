@@ -18,7 +18,7 @@
             <a onclick="addForm()" class="btn btn-primary">Tambah Supplier</a>
             @endrole
             
-            @role('admin', 'manajer')
+            @role('admin')
             <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#modal-export">
                 Export
             </button>

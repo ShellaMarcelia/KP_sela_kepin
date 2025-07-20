@@ -42,8 +42,6 @@
 
 
                     </div>
-                    <!-- /.box-body -->
-
                 </div>
 
                 <div class="modal-footer">
@@ -53,8 +51,5 @@
 
             </form>
         </div>
-        <!-- /.modal-content -->
     </div>
-    <!-- /.modal-dialog -->
 </div>
-<!-- /.modal -->

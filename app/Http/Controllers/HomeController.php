@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Product; // Make sure to import the Product model
+use App\Product; 
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -24,10 +24,7 @@ class HomeController extends Controller
      */
     public function index()
     {
-        // Fetch products with stock less than 20
         $lowStockProducts = Product::where('qty', '<', 20)->get();
-
-        // Return the view with lowStockProducts data
         return view('home', compact('lowStockProducts'));
     }
 }

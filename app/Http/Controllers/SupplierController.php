@@ -12,8 +12,7 @@ use Yajra\DataTables\DataTables;
 class SupplierController extends Controller {
 	public function __construct()
 	{
-		// Manajer & admin boleh akses index dan api
-		$this->middleware('role:manajer,admin,staff')->only(['index', 'apiSuppliers']);
+		$this->middleware('role:admin,staff')->only(['index', 'apiSuppliers']);
 	}
 
 	
@@ -34,7 +33,6 @@ class SupplierController extends Controller {
 	 * @return \Illuminate\Http\Response
 	 */
 	public function create() {
-		//
 	}
 
 	/**
@@ -50,39 +48,24 @@ class SupplierController extends Controller {
 			'email'     => 'required|unique:suppliers,email',
 			'telepon'   => 'required|string|min:10|max:13',
 		]);
-		// ── Ambil kode_supplier terbesar saat ini ─────────────────────────────
-		// $lastSupplier = Supplier::orderBy('kode_supplier', 'desc')->first();
-
-		// if ($lastSupplier && preg_match('/S(\d{4})/', $lastSupplier->kode_supplier, $m)) {
-		// 	$lastNumber = (int) $m[1];          
-		// } else {
-		// 	$lastNumber = 0;                  
-		// }
-
-		// $newNumber      = $lastNumber + 1;     
-		// $kode_supplier  = 'S' . str_pad($newNumber, 4, '0', STR_PAD_LEFT); // S0001, S0002, ...
     
 		$lastSupplier = Supplier::orderBy('kode_supplier', 'desc')->first();
-
 		if ($lastSupplier && preg_match('/S(\d{4})/', $lastSupplier->kode_supplier, $matches)) {
-			$lastNumber = (int) $matches[1]; // S0014 → 14
+			$lastNumber = (int) $matches[1]; 
 		} else {
-			$lastNumber = 0; // Jika tidak ada data
+			$lastNumber = 0; 
 		}
 
 		$newNumber = $lastNumber + 1;
-		$kode_supplier = 'S' . str_pad($newNumber, 4, '0', STR_PAD_LEFT); // Contoh: S0001
-
-		// Simpan supplier tanpa kode dulu
+		$kode_supplier = 'S' . str_pad($newNumber, 4, '0', STR_PAD_LEFT); 
 		$supplier = Supplier::create([
 			'nama' => $request->nama,
 			'alamat' => $request->alamat,
 			'email' => $request->email,
 			'telepon' => $request->telepon,
-			'kode_supplier' => '' // temporary, diupdate setelah id terbentuk
+			'kode_supplier' => '' 
 		]);
-	
-		// Generate kode_supplier setelah supplier disimpan dan punya ID
+
 		$supplier->kode_supplier = 'S' . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
 		$supplier->save();
 	
@@ -100,7 +83,6 @@ class SupplierController extends Controller {
 	 * @return \Illuminate\Http\Response
 	 */
 	public function show($id) {
-		//
 	}
 
 	/**
@@ -125,7 +107,7 @@ class SupplierController extends Controller {
 		$this->validate($request, [
 			'nama' => 'required|string|min:2',
 			'alamat' => 'required|string|min:2',
-			'email'     => 'required|string|email|max:255|unique:suppliers,email,' . $id,  // Correct the validation rule
+			'email'     => 'required|string|email|max:255|unique:suppliers,email,' . $id,  
             'telepon'   => 'required|string|min:10|max:13',
 		]);
 
@@ -164,7 +146,7 @@ class SupplierController extends Controller {
 						<a onclick="editForm('.$supplier->id.')" class="btn btn-primary btn-xs"><i class="fa fa-edit"></i> Edit</a>
 						<a onclick="deleteData('.$supplier->id.')" class="btn btn-danger btn-xs"><i class="fa fa-trash"></i> Hapus</a>';
 				}
-				return ''; // manajer tidak tampil tombol apapun
+				return ''; 
 			})
 			->make(true);
 	}

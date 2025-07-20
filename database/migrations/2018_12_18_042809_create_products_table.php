@@ -19,9 +19,6 @@ class CreateProductsTable extends Migration
             $table->integer('harga');
             $table->integer('qty')->default(0);
             $table->timestamps();
-
-
-
         });
     }
 

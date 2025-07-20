@@ -23,25 +23,34 @@
     }
 </style>
 
-<table id="product-keluar" width="100%">
+<table border="1" width="100%">
     <thead>
         <tr>
-            <td>Kode Produk Keluar</td>
-            <td>Nama Produk</td>
-            <td>Nama Pelanggan</td>
-            <td>QTY</td>
-            <td>Tanggal Pembelian</td>
+            <th>Nama Produk</th>
+            <th>QTY</th>
+            <th>QTY Total</th>
+            <th>Nama Pelanggan</th>
+            <th>Tanggal Pembelian</th>
         </tr>
     </thead>
-    @foreach($product_keluar as $pk)
-        <tbody>
-        <tr>
-            <td>{{ $pk->kode_produk_keluar }}</td>
-            <td>{{ $pk->product->nama }}</td>
-            <td>{{ $pk->customer->nama }}</td>
-            <td>{{ $pk->qty }}</td>
-            <td>{{ $pk->tanggal }}</td>
-        </tr>
-        </tbody>
-    @endforeach
+    <tbody>
+        @foreach($data as $group)
+            @foreach($group['items'] as $index => $pk)
+                <tr>
+                    @if($index === 0)
+                        <td rowspan="{{ $group['rowspan'] }}">{{ $group['nama_produk'] }}</td>
+                    @endif
+
+                    <td>{{ $pk->qty }}</td>
+
+                    @if($index === 0)
+                        <td rowspan="{{ $group['rowspan'] }}">{{ $group['qty_total'] }}</td>
+                    @endif
+
+                    <td>{{ $pk->customer->nama }}</td>
+                    <td>{{ $pk->tanggal }}</td>
+                </tr>
+            @endforeach
+        @endforeach
+    </tbody>
 </table>

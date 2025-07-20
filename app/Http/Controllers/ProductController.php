@@ -15,7 +15,7 @@ class ProductController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('role:admin,staff,manajer')->only(['index', 'apiProducts']);
+        $this->middleware('role:admin,staff')->only(['index', 'apiProducts']);
     }
 
 
@@ -37,7 +37,6 @@ class ProductController extends Controller
      */
     public function create()
     {
-        //
     }
 
     /**
@@ -50,12 +49,8 @@ class ProductController extends Controller
     {
         $this->validate($request , [
             'nama'  => 'required|string',
-            'harga' => 'required|min:4',
+            'harga' => 'required|min:3',
         ]);
-    
-        // Ambil ID terakhir dan buat kode baru
-        // $lastId = Product::max('id') + 1;
-        // $kode = 'P' . str_pad($lastId, 4, '0', STR_PAD_LEFT); // Contoh: P0005
     
         $lastProduct = Product::orderBy('kode_produk', 'desc')->first();
 
@@ -66,7 +61,7 @@ class ProductController extends Controller
         }
     
         $newNumber = $lastNumber + 1;
-        $kode = 'P' . str_pad($newNumber, 4, '0', STR_PAD_LEFT); // Contoh: P0006
+        $kode = 'P' . str_pad($newNumber, 4, '0', STR_PAD_LEFT); 
     
         $input = $request->all();
         $input['kode_produk'] = $kode;
@@ -88,7 +83,6 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        //
     }
 
     /**
@@ -120,8 +114,7 @@ class ProductController extends Controller
         $produk = Product::findOrFail($id);
         $produk->nama = $request->nama;
         $produk->harga = $request->harga;
-       // Pastikan untuk mengupdate semua kolom yang diinginkan
-        $produk->save();  // Simpan perubahan
+        $produk->save(); 
 
         return response()->json([
             'success' => true,
@@ -162,7 +155,7 @@ class ProductController extends Controller
                         <a onclick="editForm('.$product->id.')" class="btn btn-primary btn-xs"><i class="fa fa-edit"></i> Edit</a>
                         <a onclick="deleteData('.$product->id.')" class="btn btn-danger btn-xs"><i class="fa fa-trash"></i> Hapus</a>';
                 }
-                return ''; // manajer tidak tampil tombol apapun
+                return ''; 
             })
             ->make(true);
     }

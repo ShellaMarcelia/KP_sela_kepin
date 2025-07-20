@@ -14,7 +14,7 @@ class AddRoleToUsersTable extends Migration
     public function up()
     {
         Schema::table('users', function ($table) {
-            $table->string('role')->default('staff'); // Default ke 'staff'
+            $table->string('role')->default('staff'); 
         });
     }
 
@@ -27,7 +27,6 @@ class AddRoleToUsersTable extends Migration
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
-            //
         });
     }
 }
